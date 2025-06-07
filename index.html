@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify Downloader 🎵</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #141e30, #243b55);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #1f2937;
+      padding: 40px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 26px;
+      color: #1DB954;
+    }
+    input {
+      width: 70%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #1DB954;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    button:hover {
+      background: #1ed760;
+    }
+    .result-box {
+      margin-top: 25px;
+      background: #111827;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    img {
+      max-width: 100%;
+      margin: 15px 0;
+      border-radius: 10px;
+    }
+    a.download {
+      background: #1DB954;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .loading {
+      font-style: italic;
+      color: #cccccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Spotify Downloader 🎵</h1>
+    <input type="text" id="songInput" placeholder="गाने का नाम लिखें">
+    <button onclick="searchSong()">🔍 खोजें</button>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    function searchSong() {
+      const query = document.getElementById('songInput').value.trim();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<p class="loading">🔄 "' + query + '" के लिए खोजा जा रहा है...</p>';
+
+      if (!query) {
+        resultsDiv.innerHTML = '<p>❌ कृपया गाने का नाम दर्ज करें।</p>';
+        return;
+      }
+
+      fetch(`https://spotify.maybechiku.workers.dev/?name=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (!data || data.length === 0) {
+            resultsDiv.innerHTML = '<p>🚫 कोई परिणाम नहीं मिला।</p>';
+            return;
+          }
+
+          const song = data[0];
+          const title = song.title || 'नाम नहीं मिला';
+          const artist = song.artist || 'गायक नहीं मिला';
+          const cover = song.cover || '';
+          const url = song.url || '';
+
+          resultsDiv.innerHTML = `
+            <div class="result-box">
+              <h3>${title} - ${artist}</h3>
+              ${cover ? `<img src="${cover}" alt="Cover Art">` : ''}
+              ${url ? `<a class="download" href="${url}" target="_blank">⬇️ डाउनलोड करें</a>` : '<p>🔗 लिंक उपलब्ध नहीं है</p>'}
+            </div>
+          `;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          resultsDiv.innerHTML = '<p>⚠️ कुछ गलत हो गया। कृपया बाद में प्रयास करें।</p>';
+        });
+    }
+  </script>
+</body>
+</html>
